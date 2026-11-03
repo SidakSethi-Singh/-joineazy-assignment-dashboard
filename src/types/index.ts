@@ -50,3 +50,4 @@ export type SubjectFilter = 'All' | 'Computer Science' | 'Mathematics' | 'Physic
 export type StatusFilter = 'All' | 'Not Started' | 'In Progress' | 'Submitted' | 'Graded' | 'Overdue' | 'Reopened';
 
 export type SortOption = 'dueDate-asc' | 'dueDate-desc' | 'title-asc' | 'maxMarks-desc';
+
