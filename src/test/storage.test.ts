@@ -40,3 +40,4 @@ describe('storage utility', () => {
     expect(getStoredItem(STORAGE_KEYS.USERS, null)).toBeNull();
   });
 });
+

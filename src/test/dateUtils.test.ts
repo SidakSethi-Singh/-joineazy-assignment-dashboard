@@ -47,3 +47,4 @@ describe('dateUtils', () => {
     expect(typeof formatted).toBe('string');
   });
 });
+

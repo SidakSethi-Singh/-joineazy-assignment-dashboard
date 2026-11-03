@@ -130,3 +130,4 @@ export function playAlertSound(): void {
     // ignore
   }
 }
+
