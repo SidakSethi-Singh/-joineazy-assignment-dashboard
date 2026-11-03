@@ -8,9 +8,14 @@ import {
   RotateCcw,
   Sparkles,
   LogOut,
+  Command,
 } from 'lucide-react';
 
-export const Sidebar: React.FC = () => {
+interface SidebarProps {
+  onOpenCommandPalette?: () => void;
+}
+
+export const Sidebar: React.FC<SidebarProps> = ({ onOpenCommandPalette }) => {
   const { currentUser, openAuthModal, logout, resetDemoData } = useApp();
 
   const isAdmin = currentUser?.role === 'admin';
@@ -68,6 +73,21 @@ export const Sidebar: React.FC = () => {
             <BookOpen className="w-4 h-4" />
             <span>{isAdmin ? 'Assignments & Grading' : 'My Coursework'}</span>
           </a>
+
+          {onOpenCommandPalette && (
+            <button
+              onClick={onOpenCommandPalette}
+              className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-medium text-xs text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition text-left"
+            >
+              <div className="flex items-center gap-3">
+                <Command className="w-4 h-4 text-indigo-500" />
+                <span>Command Menu</span>
+              </div>
+              <kbd className="font-mono text-[10px] bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700">
+                Ctrl+K
+              </kbd>
+            </button>
+          )}
 
           <button
             onClick={openAuthModal}

@@ -10,8 +10,12 @@ import {
   CheckCircle2,
   RotateCcw,
   Clock,
+  Upload,
+  X,
+  FileCode,
 } from 'lucide-react';
 import { ConfirmModal } from '../common/ConfirmModal';
+import { playSuccessSound, playAlertSound } from '../../utils/soundEffects';
 
 interface SubmissionFormProps {
   assignment: Assignment;
@@ -30,6 +34,7 @@ export const SubmissionForm: React.FC<SubmissionFormProps> = ({
   const [linkOrFileName, setLinkOrFileName] = useState('');
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [errorText, setErrorText] = useState('');
+  const [isDragging, setIsDragging] = useState(false);
 
   const isGraded = submission?.status === 'Graded';
   const isSubmitted = submission?.status === 'Submitted';
@@ -41,12 +46,19 @@ export const SubmissionForm: React.FC<SubmissionFormProps> = ({
     if (submission) {
       setContent(submission.content || '');
       setLinkOrFileName(submission.linkOrFileName || '');
+      if (submission.status === 'Reopened') {
+        playAlertSound();
+      }
     } else {
       setContent('');
       setLinkOrFileName('');
     }
     setErrorText('');
   }, [submission, assignment.id]);
+
+  const wordCount = content.trim() ? content.trim().split(/\s+/).length : 0;
+  const charCount = content.length;
+  const estimatedReadTime = Math.ceil(wordCount / 200);
 
   const handlePreSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,13 +67,34 @@ export const SubmissionForm: React.FC<SubmissionFormProps> = ({
       return;
     }
     setErrorText('');
-    // Trigger Step 2: Final confirmation dialog (Core PDF requirement: 2-step confirmation)
     setIsConfirmOpen(true);
   };
 
   const handleFinalSubmit = () => {
+    playSuccessSound();
     submitAssignment(assignment.id, content.trim(), linkOrFileName.trim());
     if (onSuccess) onSuccess();
+  };
+
+  const handleFileDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    if (isLocked) return;
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      const file = files[0];
+      const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
+      setLinkOrFileName(`${file.name} (${sizeMb} MB)`);
+    }
+  };
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
+      setLinkOrFileName(`${file.name} (${sizeMb} MB)`);
+    }
   };
 
   const isUrl = (val: string) => {
@@ -114,7 +147,7 @@ export const SubmissionForm: React.FC<SubmissionFormProps> = ({
             </div>
           )}
           <p className="text-xs text-amber-800 dark:text-amber-300 font-medium">
-            ✏️ You can edit your text answer and link below, then click "Resubmit Revised Work".
+            ✏️ You can edit your text answer and link below, then click "Submit Revised Work".
           </p>
         </div>
       )}
@@ -130,11 +163,16 @@ export const SubmissionForm: React.FC<SubmissionFormProps> = ({
               <FileText className="w-4 h-4 text-indigo-500" />
               <span>Written Answer / Submission Notes *</span>
             </label>
-            {isLocked && (
-              <span className="flex items-center gap-1 text-[11px] font-semibold text-slate-500 dark:text-slate-400">
-                <Lock className="w-3 h-3" /> Locked
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] text-slate-400 font-medium">
+                {wordCount} words · {charCount} chars · ~{estimatedReadTime} min read
               </span>
-            )}
+              {isLocked && (
+                <span className="flex items-center gap-1 text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                  <Lock className="w-3 h-3" /> Locked
+                </span>
+              )}
+            </div>
           </div>
 
           <textarea
@@ -147,7 +185,7 @@ export const SubmissionForm: React.FC<SubmissionFormProps> = ({
               if (errorText) setErrorText('');
             }}
             placeholder="Type your explanation, summary, code explanation, or methodology here..."
-            className={`w-full text-sm rounded-xl border p-3.5 transition focus:outline-hidden focus:ring-2 focus:ring-indigo-500 ${
+            className={`w-full text-sm rounded-xl border p-3.5 transition focus:outline-hidden focus:ring-2 focus:ring-indigo-500 font-sans ${
               isLocked
                 ? 'bg-slate-100/70 dark:bg-slate-800/60 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700 cursor-not-allowed'
                 : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400'
@@ -161,6 +199,7 @@ export const SubmissionForm: React.FC<SubmissionFormProps> = ({
           )}
         </div>
 
+        {/* Attachment & Link Section */}
         <div>
           <div className="flex items-center justify-between mb-1.5">
             <label
@@ -168,15 +207,18 @@ export const SubmissionForm: React.FC<SubmissionFormProps> = ({
               className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1.5"
             >
               <ExternalLink className="w-4 h-4 text-indigo-500" />
-              <span>Optional Drive Link / GitHub URL / Attached File Name</span>
+              <span>External Link or Attached File Reference</span>
             </label>
           </div>
 
           {isLocked && linkOrFileName ? (
             <div className="p-3 rounded-xl bg-slate-100/70 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-3">
-              <span className="text-sm text-slate-800 dark:text-slate-200 font-medium truncate">
-                {linkOrFileName}
-              </span>
+              <div className="flex items-center gap-2 min-w-0">
+                <FileCode className="w-4 h-4 text-indigo-500 shrink-0" />
+                <span className="text-sm text-slate-800 dark:text-slate-200 font-medium truncate">
+                  {linkOrFileName}
+                </span>
+              </div>
               {isUrl(linkOrFileName) && (
                 <a
                   href={linkOrFileName}
@@ -189,23 +231,59 @@ export const SubmissionForm: React.FC<SubmissionFormProps> = ({
               )}
             </div>
           ) : (
-            <input
-              id="submission-link"
-              type="text"
-              disabled={isLocked}
-              value={linkOrFileName}
-              onChange={(e) => setLinkOrFileName(e.target.value)}
-              placeholder="e.g. https://drive.google.com/... or https://github.com/... or assignment_final.pdf"
-              className={`w-full text-sm rounded-xl border p-3 transition focus:outline-hidden focus:ring-2 focus:ring-indigo-500 ${
-                isLocked
-                  ? 'bg-slate-100/70 dark:bg-slate-800/60 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700 cursor-not-allowed'
-                  : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400'
-              }`}
-            />
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <input
+                  id="submission-link"
+                  type="text"
+                  disabled={isLocked}
+                  value={linkOrFileName}
+                  onChange={(e) => setLinkOrFileName(e.target.value)}
+                  placeholder="e.g. https://drive.google.com/... or https://github.com/... or project.zip"
+                  className="flex-1 text-sm rounded-xl border border-slate-300 dark:border-slate-700 p-2.5 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 transition"
+                />
+                {linkOrFileName && !isLocked && (
+                  <button
+                    type="button"
+                    onClick={() => setLinkOrFileName('')}
+                    className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400"
+                    title="Clear attachment"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+
+              {/* Drag-and-drop simulated dropzone */}
+              {!isLocked && (
+                <div
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    setIsDragging(true);
+                  }}
+                  onDragLeave={() => setIsDragging(false)}
+                  onDrop={handleFileDrop}
+                  className={`p-3 rounded-xl border-2 border-dashed transition-all flex items-center justify-center gap-2 text-xs cursor-pointer ${
+                    isDragging
+                      ? 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/40 text-indigo-600'
+                      : 'border-slate-200 dark:border-slate-700/80 hover:border-indigo-300 dark:hover:border-indigo-700 text-slate-500'
+                  }`}
+                  onClick={() => document.getElementById('mock-file-input')?.click()}
+                >
+                  <Upload className="w-4 h-4 text-indigo-500 shrink-0" />
+                  <span>
+                    Drag & drop mock assignment file (PDF, ZIP, DOCX, PY, SQL) or <span className="font-semibold text-indigo-600 dark:text-indigo-400 underline">browse</span>
+                  </span>
+                  <input
+                    id="mock-file-input"
+                    type="file"
+                    className="hidden"
+                    onChange={handleFileInputChange}
+                  />
+                </div>
+              )}
+            </div>
           )}
-          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-            (No real file upload required; stored cleanly as a link or attachment reference)
-          </p>
         </div>
 
         {/* Submission Timestamp Info */}

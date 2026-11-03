@@ -10,14 +10,20 @@ import {
   GraduationCap,
   ShieldCheck,
   LogOut,
+  Command,
 } from 'lucide-react';
 
 interface MobileNavProps {
   isOpen: boolean;
   onClose: () => void;
+  onOpenCommandPalette?: () => void;
 }
 
-export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
+export const MobileNav: React.FC<MobileNavProps> = ({
+  isOpen,
+  onClose,
+  onOpenCommandPalette,
+}) => {
   const {
     currentUser,
     openAuthModal,
@@ -110,6 +116,23 @@ export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
               <BookOpen className="w-4 h-4" />
               <span>{isAdmin ? 'Assignments & Grading' : 'My Coursework'}</span>
             </button>
+            {onOpenCommandPalette && (
+              <button
+                onClick={() => {
+                  onClose();
+                  onOpenCommandPalette();
+                }}
+                className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-medium text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 text-left"
+              >
+                <div className="flex items-center gap-3">
+                  <Command className="w-4 h-4 text-indigo-500" />
+                  <span>Spotlight Command Menu</span>
+                </div>
+                <kbd className="font-mono text-[10px] bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700">
+                  Ctrl+K
+                </kbd>
+              </button>
+            )}
             <button
               onClick={() => {
                 onClose();

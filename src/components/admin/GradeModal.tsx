@@ -10,7 +10,9 @@ import {
   FileText,
   AlertTriangle,
   Clock,
+  Sparkles,
 } from 'lucide-react';
+import { playSuccessSound } from '../../utils/soundEffects';
 
 interface GradeModalProps {
   isOpen: boolean;
@@ -19,6 +21,12 @@ interface GradeModalProps {
   student: User;
   submission?: Submission;
 }
+
+const FEEDBACK_PRESETS = [
+  '⭐️ Outstanding work! Rigorous methodology, comprehensive proofs, and clean documentation.',
+  '👍 Good effort. Well structured, but please refine edge case considerations.',
+  '⚠️ Needs revision. Please re-check the calculations and update your methodology according to the rubric.',
+];
 
 export const GradeModal: React.FC<GradeModalProps> = ({
   isOpen,
@@ -64,6 +72,7 @@ export const GradeModal: React.FC<GradeModalProps> = ({
       return;
     }
 
+    playSuccessSound();
     gradeSubmission(submission.id, numGrade, feedbackInput.trim());
     onClose();
   };
@@ -77,6 +86,12 @@ export const GradeModal: React.FC<GradeModalProps> = ({
 
     requestRevision(submission.id, feedbackInput.trim());
     onClose();
+  };
+
+  const setPresetGrade = (pct: number) => {
+    const calculated = Math.round((assignment.maxMarks * pct) / 100);
+    setGradeInput(String(calculated));
+    setErrorText('');
   };
 
   const isUrl = (val?: string) => {
@@ -171,12 +186,14 @@ export const GradeModal: React.FC<GradeModalProps> = ({
           <form onSubmit={handleSaveGrade} className="pt-3 border-t border-slate-200 dark:border-slate-800 space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="sm:col-span-1">
-                <label
-                  htmlFor="marks-input"
-                  className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5"
-                >
-                  Marks Obtained *
-                </label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label
+                    htmlFor="marks-input"
+                    className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300"
+                  >
+                    Marks Obtained *
+                  </label>
+                </div>
                 <div className="relative">
                   <input
                     id="marks-input"
@@ -195,6 +212,26 @@ export const GradeModal: React.FC<GradeModalProps> = ({
                   <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">
                     / {assignment.maxMarks}
                   </span>
+                </div>
+
+                {/* Quick Score Presets */}
+                <div className="mt-2 flex items-center gap-1">
+                  <span className="text-[10px] text-slate-400 font-medium">Quick:</span>
+                  {[
+                    { label: '100%', pct: 100 },
+                    { label: '90%', pct: 90 },
+                    { label: '75%', pct: 75 },
+                    { label: '50%', pct: 50 },
+                  ].map((p) => (
+                    <button
+                      key={p.label}
+                      type="button"
+                      onClick={() => setPresetGrade(p.pct)}
+                      className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-slate-100 hover:bg-indigo-100 text-slate-700 dark:bg-slate-800 dark:hover:bg-indigo-950/60 dark:text-slate-300 hover:text-indigo-600 transition"
+                    >
+                      {p.label}
+                    </button>
+                  ))}
                 </div>
               </div>
 
@@ -216,6 +253,25 @@ export const GradeModal: React.FC<GradeModalProps> = ({
                   placeholder="Provide constructive feedback, praise strengths, or state revision instructions..."
                   className="w-full text-sm rounded-xl border border-slate-300 dark:border-slate-700 p-2.5 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
                 />
+
+                {/* Feedback Presets */}
+                <div className="mt-2 space-y-1">
+                  <span className="text-[10px] text-slate-400 font-medium flex items-center gap-1">
+                    <Sparkles className="w-3 h-3 text-indigo-400" /> Insert quick feedback snippet:
+                  </span>
+                  <div className="flex flex-wrap gap-1">
+                    {FEEDBACK_PRESETS.map((preset, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => setFeedbackInput(preset)}
+                        className="text-[10px] text-left px-2 py-1 rounded bg-slate-100 hover:bg-indigo-50 text-slate-600 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 line-clamp-1 transition"
+                      >
+                        {preset.slice(0, 38)}...
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
 

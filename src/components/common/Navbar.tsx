@@ -10,17 +10,20 @@ import {
   Menu,
   X,
   LogOut,
+  Search,
 } from 'lucide-react';
 import { ConfirmModal } from './ConfirmModal';
 
 interface NavbarProps {
   onToggleMobileNav?: () => void;
   isMobileNavOpen?: boolean;
+  onOpenCommandPalette?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
   onToggleMobileNav,
   isMobileNavOpen = false,
+  onOpenCommandPalette,
 }) => {
   const {
     currentUser,
@@ -87,6 +90,21 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Right Actions */}
           <div className="flex items-center gap-2 sm:gap-3">
+            {/* Quick Command Menu Search Button */}
+            {onOpenCommandPalette && (
+              <button
+                onClick={onOpenCommandPalette}
+                className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 text-xs text-slate-500 hover:text-slate-900 dark:hover:text-white transition shadow-xs group"
+                title="Open Spotlight Command Palette (Ctrl+K)"
+              >
+                <Search className="w-3.5 h-3.5 text-slate-400 group-hover:text-indigo-500" />
+                <span className="hidden md:inline">Quick Jump...</span>
+                <kbd className="hidden lg:inline-block font-mono text-[10px] bg-white dark:bg-slate-700 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-600 text-slate-400">
+                  Ctrl+K
+                </kbd>
+              </button>
+            )}
+
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}

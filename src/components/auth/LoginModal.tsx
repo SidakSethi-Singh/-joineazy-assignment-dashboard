@@ -2,6 +2,7 @@ import React from 'react';
 import { useApp } from '../../context/AppContext';
 import { Modal } from '../common/Modal';
 import { ShieldCheck, GraduationCap, UserCheck, Check } from 'lucide-react';
+import { playSwitchSound } from '../../utils/soundEffects';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -65,6 +66,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               <button
                 key={user.id}
                 onClick={() => {
+                  playSwitchSound();
                   switchUser(user.id);
                   onClose();
                 }}
@@ -121,6 +123,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               <button
                 key={user.id}
                 onClick={() => {
+                  playSwitchSound();
                   switchUser(user.id);
                   onClose();
                 }}

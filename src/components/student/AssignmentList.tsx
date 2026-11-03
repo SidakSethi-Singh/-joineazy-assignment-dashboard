@@ -8,7 +8,11 @@ import {
   Search,
   ExternalLink,
   ArrowRight,
+  LayoutGrid,
+  CalendarDays,
+  Clock,
 } from 'lucide-react';
+import { formatDueDate } from '../../utils/dateUtils';
 
 interface AssignmentListProps {
   onSelectAssignment: (assignment: Assignment) => void;
@@ -23,6 +27,7 @@ export const AssignmentList: React.FC<AssignmentListProps> = ({
   const [selectedSubject, setSelectedSubject] = useState('All');
   const [selectedStatus, setSelectedStatus] = useState<string>('All');
   const [sortBy, setSortBy] = useState<SortOption>('dueDate-asc');
+  const [viewMode, setViewMode] = useState<'cards' | 'timeline'>('cards');
 
   if (!currentUser || currentUser.role !== 'student') return null;
 
@@ -172,6 +177,32 @@ export const AssignmentList: React.FC<AssignmentListProps> = ({
               <option value="maxMarks-desc">Max Marks: High to Low</option>
             </select>
           </div>
+
+          {/* View Mode Toggle (Cards vs Timeline) */}
+          <div className="flex items-center rounded-xl bg-slate-100 dark:bg-slate-800 p-1 shrink-0">
+            <button
+              onClick={() => setViewMode('cards')}
+              className={`p-2 rounded-lg transition ${
+                viewMode === 'cards'
+                  ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-xs'
+                  : 'text-slate-500 hover:text-slate-900 dark:text-slate-400'
+              }`}
+              title="Card View"
+            >
+              <LayoutGrid className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setViewMode('timeline')}
+              className={`p-2 rounded-lg transition ${
+                viewMode === 'timeline'
+                  ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-xs'
+                  : 'text-slate-500 hover:text-slate-900 dark:text-slate-400'
+              }`}
+              title="Timeline Milestone View"
+            >
+              <CalendarDays className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
         {/* Filter Summary */}
@@ -190,7 +221,7 @@ export const AssignmentList: React.FC<AssignmentListProps> = ({
         )}
       </div>
 
-      {/* Assignment List / Cards */}
+      {/* Assignment List / Cards or Timeline */}
       {filteredAssignments.length === 0 ? (
         <EmptyState
           title="No assignments match your filter"
@@ -200,7 +231,75 @@ export const AssignmentList: React.FC<AssignmentListProps> = ({
             onClick: clearFilters,
           }}
         />
+      ) : viewMode === 'timeline' ? (
+        /* Timeline View */
+        <div className="p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs">
+          <div className="relative pl-6 sm:pl-8 space-y-6 before:absolute before:left-2.5 sm:before:left-3 before:top-3 before:bottom-3 before:w-0.5 before:bg-slate-200 dark:before:bg-slate-800">
+            {filteredAssignments.map((assignment) => {
+              const { status, submission, isOverdue: overdue, isDueToday: dueToday } =
+                getStudentAssignmentStatus(assignment);
+              const isCompleted = status === 'Graded' || status === 'Submitted';
+
+              return (
+                <div key={assignment.id} className="relative group">
+                  {/* Timeline dot */}
+                  <div
+                    className={`absolute -left-6 sm:-left-8 top-1.5 w-5 h-5 rounded-full border-2 bg-white dark:bg-slate-900 transition-all ${
+                      overdue && !isCompleted
+                        ? 'border-rose-500 ring-4 ring-rose-500/20'
+                        : dueToday && !isCompleted
+                        ? 'border-amber-500 ring-4 ring-amber-500/20'
+                        : isCompleted
+                        ? 'border-emerald-500 ring-4 ring-emerald-500/20'
+                        : 'border-indigo-500 ring-4 ring-indigo-500/20'
+                    }`}
+                  />
+
+                  <div
+                    onClick={() => onSelectAssignment(assignment)}
+                    className="p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:bg-white dark:hover:bg-slate-800/80 hover:shadow-md transition-all cursor-pointer space-y-2"
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">
+                          {assignment.subject}
+                        </span>
+                        <span className="text-slate-300 dark:text-slate-700">•</span>
+                        <span className="text-xs text-slate-500">
+                          {assignment.maxMarks} Marks
+                        </span>
+                      </div>
+                      <StatusBadge status={status} size="sm" />
+                    </div>
+
+                    <h4 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                      {assignment.title}
+                    </h4>
+
+                    <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-200/60 dark:border-slate-700/60 text-xs">
+                      <div className="flex items-center gap-1.5 text-slate-500">
+                        <Clock className="w-3.5 h-3.5 text-slate-400" />
+                        <span>Deadline: {formatDueDate(assignment.dueDate)}</span>
+                      </div>
+
+                      {status === 'Graded' && typeof submission?.grade === 'number' && (
+                        <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                          Grade: {submission.grade}/{assignment.maxMarks}
+                        </span>
+                      )}
+
+                      <span className="font-semibold text-indigo-600 dark:text-indigo-400 flex items-center gap-1">
+                        View & Submit <ArrowRight className="w-3.5 h-3.5" />
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       ) : (
+        /* Cards View */
         <div className="grid grid-cols-1 gap-3.5">
           {filteredAssignments.map((assignment) => {
             const { status, submission, isOverdue: overdue, isDueToday: dueToday } =
