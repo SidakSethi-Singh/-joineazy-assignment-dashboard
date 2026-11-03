@@ -8,7 +8,7 @@
 
 - **Deployable Target**: Vercel / Netlify (zero backend, builds into a pure static SPA)
 - **Build Status**: `npm run build` passes with 0 errors / 0 warnings.
-- **Unit & Integration Tests**: `npm test` runs 14 automated Vitest tests covering data isolation, status computations, date urgency, and storage fallback.
+- **Unit & Integration Tests**: `npm test` runs 20 automated Vitest tests covering data isolation, status computations, date urgency, UI component rendering, and storage fallback.
 - **Persistence**: All state (assignments, submissions, grades, revisions, dark mode) persists across browser reloads via `localStorage`.
 - **Demo Data**: Seeded with 7 demo accounts, 5 realistic course assignments with dynamic relative due dates, and mixed submission states.
 
@@ -143,6 +143,7 @@ The application features a dedicated **Mock Login & Role Switcher** screen. Clic
 │   │   ├── setup.ts                 # Test setup configuration
 │   │   ├── dateUtils.test.ts        # Unit tests for date and urgency calculations
 │   │   ├── dataIsolation.test.ts    # Tests for student data isolation and seed constraints
+│   │   ├── components.test.tsx      # DOM assertion tests for StatusBadge & DueDateBadge
 │   │   └── storage.test.ts          # Tests for localStorage serialization and fallback
 │   ├── context/
 │   │   ├── AppContext.tsx           # Global state, data isolation logic, CRUD operations
@@ -199,7 +200,7 @@ The application features a dedicated **Mock Login & Role Switcher** screen. Clic
 # 1. Install dependencies
 npm install
 
-# 2. Run automated test suite (14 tests in Vitest)
+# 2. Run automated test suite (20 tests in Vitest across 4 test suites)
 npm test
 
 # 3. Start local development server
