@@ -3,6 +3,7 @@ import { Assignment, Submission, User } from '../../types';
 import { useApp } from '../../context/AppContext';
 import { Modal } from '../common/Modal';
 import { StatusBadge } from '../common/StatusBadge';
+import { SubmissionAttachmentModal } from '../common/SubmissionAttachmentModal';
 import {
   CheckCircle2,
   RotateCcw,
@@ -11,6 +12,7 @@ import {
   AlertTriangle,
   Clock,
   Sparkles,
+  Eye,
 } from 'lucide-react';
 import { playSuccessSound } from '../../utils/soundEffects';
 
@@ -40,6 +42,7 @@ export const GradeModal: React.FC<GradeModalProps> = ({
   const [gradeInput, setGradeInput] = useState<string>('');
   const [feedbackInput, setFeedbackInput] = useState<string>('');
   const [errorText, setErrorText] = useState<string>('');
+  const [showAttachmentModal, setShowAttachmentModal] = useState<boolean>(false);
 
   useEffect(() => {
     if (submission) {
@@ -154,16 +157,27 @@ export const GradeModal: React.FC<GradeModalProps> = ({
                       {submission.linkOrFileName}
                     </span>
                   </div>
-                  {isUrl(submission.linkOrFileName) && (
-                    <a
-                      href={submission.linkOrFileName}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-xs font-bold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 shrink-0 inline-flex items-center gap-1"
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => setShowAttachmentModal(true)}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 text-xs font-bold transition"
+                      title="Inspect student submission artifact"
                     >
-                      Open Link <ExternalLink className="w-3 h-3" />
-                    </a>
-                  )}
+                      <Eye className="w-3.5 h-3.5" />
+                      <span>Inspect File</span>
+                    </button>
+                    {isUrl(submission.linkOrFileName) && !submission.linkOrFileName.includes('drive.google.com/file/d/') && (
+                      <a
+                        href={submission.linkOrFileName}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-xs font-semibold text-slate-500 hover:text-slate-700 dark:text-slate-400 inline-flex items-center gap-1"
+                      >
+                        Open <ExternalLink className="w-3 h-3" />
+                      </a>
+                    )}
+                  </div>
                 </div>
               )}
 
@@ -314,6 +328,18 @@ export const GradeModal: React.FC<GradeModalProps> = ({
           </form>
         )}
       </div>
+
+      {/* Submission Attachment In-App Preview Modal */}
+      {showAttachmentModal && submission?.linkOrFileName && (
+        <SubmissionAttachmentModal
+          isOpen={showAttachmentModal}
+          onClose={() => setShowAttachmentModal(false)}
+          fileNameOrUrl={submission.linkOrFileName}
+          studentName={student.name}
+          submittedAt={submission.submittedAt || undefined}
+          contentExcerpt={submission.content}
+        />
+      )}
     </Modal>
   );
 };

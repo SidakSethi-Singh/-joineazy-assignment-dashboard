@@ -6,6 +6,7 @@ import { SubmissionsTable } from './SubmissionsTable';
 import { AssignmentFormModal } from './AssignmentFormModal';
 import { ConfirmModal } from '../common/ConfirmModal';
 import { EmptyState } from '../common/EmptyState';
+import { CourseMaterialsModal } from '../common/CourseMaterialsModal';
 import {
   Plus,
   Edit2,
@@ -13,9 +14,9 @@ import {
   ChevronDown,
   ChevronUp,
   Search,
-  ExternalLink,
   Users,
   Download,
+  FolderGit2,
 } from 'lucide-react';
 import { exportGradebookToCSV } from '../../utils/csvExport';
 
@@ -37,6 +38,7 @@ export const AssignmentManagement: React.FC = () => {
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [assignmentToEdit, setAssignmentToEdit] = useState<Assignment | null>(null);
   const [assignmentToDelete, setAssignmentToDelete] = useState<Assignment | null>(null);
+  const [materialsAssignment, setMaterialsAssignment] = useState<Assignment | null>(null);
 
   // Expanded assignment accordion IDs
   const [expandedId, setExpandedId] = useState<string | null>(() => {
@@ -268,17 +270,18 @@ export const AssignmentManagement: React.FC = () => {
                         <span>{subs.length} Submissions Logged</span>
                       </span>
 
-                      {assignment.driveLink && (
-                        <a
-                          href={assignment.driveLink}
-                          target="_blank"
-                          rel="noreferrer"
-                          onClick={(e) => e.stopPropagation()}
-                          className="hidden sm:inline-flex items-center gap-1 text-indigo-600 dark:text-indigo-400 hover:underline font-semibold"
-                        >
-                          <ExternalLink className="w-3 h-3" /> Drive Materials
-                        </a>
-                      )}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setMaterialsAssignment(assignment);
+                        }}
+                        className="hidden sm:inline-flex items-center gap-1 text-indigo-600 dark:text-indigo-400 hover:underline font-semibold cursor-pointer"
+                        title="View Course Materials & Lab Resources"
+                      >
+                        <FolderGit2 className="w-3.5 h-3.5" />
+                        <span>Course Materials</span>
+                      </button>
                     </div>
 
                     <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-1">
@@ -343,6 +346,16 @@ export const AssignmentManagement: React.FC = () => {
         cancelLabel="Cancel"
         variant="danger"
       />
+
+      {/* Course Materials Modal */}
+      {materialsAssignment && (
+        <CourseMaterialsModal
+          isOpen={Boolean(materialsAssignment)}
+          onClose={() => setMaterialsAssignment(null)}
+          assignment={materialsAssignment}
+          instructorName={currentUser?.name}
+        />
+      )}
     </div>
   );
 };

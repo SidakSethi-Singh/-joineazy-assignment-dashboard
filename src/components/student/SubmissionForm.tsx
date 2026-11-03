@@ -13,8 +13,10 @@ import {
   Upload,
   X,
   FileCode,
+  Eye,
 } from 'lucide-react';
 import { ConfirmModal } from '../common/ConfirmModal';
+import { SubmissionAttachmentModal } from '../common/SubmissionAttachmentModal';
 import { playSuccessSound, playAlertSound } from '../../utils/soundEffects';
 
 interface SubmissionFormProps {
@@ -35,6 +37,7 @@ export const SubmissionForm: React.FC<SubmissionFormProps> = ({
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [errorText, setErrorText] = useState('');
   const [isDragging, setIsDragging] = useState(false);
+  const [showAttachmentModal, setShowAttachmentModal] = useState(false);
 
   const isGraded = submission?.status === 'Graded';
   const isSubmitted = submission?.status === 'Submitted';
@@ -219,16 +222,27 @@ export const SubmissionForm: React.FC<SubmissionFormProps> = ({
                   {linkOrFileName}
                 </span>
               </div>
-              {isUrl(linkOrFileName) && (
-                <a
-                  href={linkOrFileName}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1 text-xs font-bold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 shrink-0"
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setShowAttachmentModal(true)}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 text-xs font-bold transition"
+                  title="Preview submitted file"
                 >
-                  Open Link <ExternalLink className="w-3 h-3" />
-                </a>
-              )}
+                  <Eye className="w-3.5 h-3.5" />
+                  <span>Preview File</span>
+                </button>
+                {isUrl(linkOrFileName) && !linkOrFileName.includes('drive.google.com/file/d/') && (
+                  <a
+                    href={linkOrFileName}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-slate-500 hover:text-slate-700 dark:text-slate-400"
+                  >
+                    Open <ExternalLink className="w-3 h-3" />
+                  </a>
+                )}
+              </div>
             </div>
           ) : (
             <div className="space-y-2">
@@ -353,6 +367,17 @@ export const SubmissionForm: React.FC<SubmissionFormProps> = ({
         cancelLabel="Back to Editing"
         variant="primary"
       />
+
+      {/* Submission Attachment In-App Preview Modal */}
+      {showAttachmentModal && (
+        <SubmissionAttachmentModal
+          isOpen={showAttachmentModal}
+          onClose={() => setShowAttachmentModal(false)}
+          fileNameOrUrl={linkOrFileName}
+          contentExcerpt={content}
+          submittedAt={submission?.submittedAt || undefined}
+        />
+      )}
     </div>
   );
 };
