@@ -32,7 +32,7 @@ export const AssignmentManagement: React.FC = () => {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSubject, setSelectedSubject] = useState('All');
-  const [scopeFilter, setScopeFilter] = useState<'all' | 'mine'>('all');
+  const [scopeFilter, setScopeFilter] = useState<'all' | 'mine'>('mine');
 
   // Modal states
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);

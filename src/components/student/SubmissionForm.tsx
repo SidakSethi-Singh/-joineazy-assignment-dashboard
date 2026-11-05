@@ -327,17 +327,17 @@ export const SubmissionForm: React.FC<SubmissionFormProps> = ({
               {isReopened ? (
                 <>
                   <RotateCcw className="w-4 h-4" />
-                  <span>Submit Revised Work</span>
+                  <span>Yes, I have submitted (Revised Work)</span>
                 </>
               ) : (
                 <>
                   <Send className="w-4 h-4" />
-                  <span>Submit Assignment</span>
+                  <span>Yes, I have submitted</span>
                 </>
               )}
             </button>
             <p className="text-center text-[11px] text-slate-400 dark:text-slate-500 mt-2">
-              Step 1 of 2: Clicking will ask for your final confirmation before locking.
+              Step 1 of 2: Clicking "Yes, I have submitted" opens final confirmation dialog.
             </p>
           </div>
         )}
@@ -348,22 +348,22 @@ export const SubmissionForm: React.FC<SubmissionFormProps> = ({
         isOpen={isConfirmOpen}
         onClose={() => setIsConfirmOpen(false)}
         onConfirm={handleFinalSubmit}
-        title="Confirm Assignment Submission"
+        title="Final Submission Confirmation"
         description={
           <div className="space-y-2 text-left">
             <p>
-              Are you sure you want to submit your coursework for{' '}
+              Are you sure you want to finalize and lock your coursework for{' '}
               <strong className="text-slate-900 dark:text-white">
                 "{assignment.title}"
               </strong>
               ?
             </p>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              🔒 Once submitted, your submission will be locked and routed to the professor for evaluation. It cannot be altered unless reopened for revision.
+              🔒 Once confirmed, the status immediately changes to <strong>Submitted</strong> and your submission locks for professor evaluation.
             </p>
           </div>
         }
-        confirmLabel="Yes, I Have Submitted"
+        confirmLabel="Yes, I have submitted (Final Confirm)"
         cancelLabel="Back to Editing"
         variant="primary"
       />

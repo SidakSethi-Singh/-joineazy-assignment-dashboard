@@ -4,13 +4,14 @@ import { Assignment, SortOption } from '../../types';
 import { StatusBadge } from '../common/StatusBadge';
 import { DueDateBadge } from '../common/DueDateBadge';
 import { EmptyState } from '../common/EmptyState';
+import { CourseMaterialsModal } from '../common/CourseMaterialsModal';
 import {
   Search,
-  ExternalLink,
   ArrowRight,
   LayoutGrid,
   CalendarDays,
   Clock,
+  FolderGit2,
 } from 'lucide-react';
 import { formatDueDate } from '../../utils/dateUtils';
 
@@ -28,6 +29,7 @@ export const AssignmentList: React.FC<AssignmentListProps> = ({
   const [selectedStatus, setSelectedStatus] = useState<string>('All');
   const [sortBy, setSortBy] = useState<SortOption>('dueDate-asc');
   const [viewMode, setViewMode] = useState<'cards' | 'timeline'>('cards');
+  const [materialsAssignment, setMaterialsAssignment] = useState<Assignment | null>(null);
 
   if (!currentUser || currentUser.role !== 'student') return null;
 
@@ -363,12 +365,13 @@ export const AssignmentList: React.FC<AssignmentListProps> = ({
                       <span
                         onClick={(e) => {
                           e.stopPropagation();
-                          window.open(assignment.driveLink, '_blank');
+                          setMaterialsAssignment(assignment);
                         }}
-                        className="hidden sm:inline-flex items-center gap-1 text-xs font-semibold text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-300"
+                        className="hidden sm:inline-flex items-center gap-1 text-xs font-semibold text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-300 cursor-pointer"
+                        title="View Course Materials & Lab Repository"
                       >
-                        <ExternalLink className="w-3.5 h-3.5" />
-                        <span>Drive Materials</span>
+                        <FolderGit2 className="w-3.5 h-3.5" />
+                        <span>Course Materials</span>
                       </span>
                     )}
 
@@ -388,6 +391,15 @@ export const AssignmentList: React.FC<AssignmentListProps> = ({
             );
           })}
         </div>
+      )}
+
+      {/* Course Materials & Repository In-App Modal */}
+      {materialsAssignment && (
+        <CourseMaterialsModal
+          isOpen={Boolean(materialsAssignment)}
+          onClose={() => setMaterialsAssignment(null)}
+          assignment={materialsAssignment}
+        />
       )}
     </div>
   );

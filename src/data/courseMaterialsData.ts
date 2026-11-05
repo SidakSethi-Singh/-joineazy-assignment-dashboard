@@ -260,3 +260,4 @@ export const COURSE_MATERIALS_MAP: Record<string, AssignmentMaterials> = {
     ],
   },
 };
+

@@ -8,30 +8,44 @@ interface AdminStatsProps {
 }
 
 export const AdminStats: React.FC<AdminStatsProps> = () => {
-  const { assignments, submissions, users } = useApp();
+  const { assignments, submissions, users, currentUser } = useApp();
 
   const studentUsers = users.filter((u) => u.role === 'student');
 
-  const totalAssignments = assignments.length;
-  const totalSubmissions = submissions.length;
+  // Filter assignments created by this admin
+  const adminAssignments =
+    currentUser?.role === 'admin'
+      ? assignments.filter((a) => a.createdBy === currentUser.id)
+      : assignments;
 
-  // Pending grading = submitted or reopened (awaiting professor's grading)
-  const pendingGradingCount = submissions.filter(
+  const totalAssignments = adminAssignments.length;
+
+  // Submissions associated with this admin's coursework
+  const adminAssignmentIds = new Set(adminAssignments.map((a) => a.id));
+  const adminSubmissions = submissions.filter((s) =>
+    adminAssignmentIds.has(s.assignmentId)
+  );
+  const totalSubmissions = adminSubmissions.length;
+
+  // Pending grading = submitted (awaiting professor's grading)
+  const pendingGradingCount = adminSubmissions.filter(
     (s) => s.status === 'Submitted'
   ).length;
 
-  const gradedCount = submissions.filter((s) => s.status === 'Graded').length;
+  const gradedCount = adminSubmissions.filter((s) => s.status === 'Graded').length;
 
-  // Overdue count: for every assignment that is overdue, how many students did NOT submit
+  // Overdue count: for every assignment created by this admin that is overdue, how many assigned students did NOT submit
   let overdueSubmissionsCount = 0;
-  assignments.forEach((asg) => {
+  adminAssignments.forEach((asg) => {
     if (isOverdue(asg.dueDate)) {
       studentUsers.forEach((student) => {
-        const sub = submissions.find(
-          (s) => s.assignmentId === asg.id && s.studentId === student.id
-        );
-        if (!sub || sub.status === 'Not Started') {
-          overdueSubmissionsCount++;
+        if (!asg.assignedTo || asg.assignedTo === 'all' || asg.assignedTo.includes(student.id)) {
+          const sub = adminSubmissions.find(
+            (s) => s.assignmentId === asg.id && s.studentId === student.id
+          );
+          if (!sub || sub.status === 'Not Started') {
+            overdueSubmissionsCount++;
+          }
         }
       });
     }
