@@ -81,6 +81,8 @@ git push -u origin main
 
 ## 🎥 3. Demo Video Walkthrough Script (3–5 Minutes)
 
+> 💡 **Full Click-by-Click Teleprompter Script**: For an exact line-by-line guide on where to click and what to say, open [`VIDEO_RECORDING_SCRIPT.md`](./VIDEO_RECORDING_SCRIPT.md).
+
 Record this using [Loom.com](https://www.loom.com/) (free) or OBS/Screen Recorder uploaded to Google Drive with permission set to **"Anyone with the link can view"**.
 
 ### ⏱️ Timestamped Video Script
