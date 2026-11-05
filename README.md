@@ -6,6 +6,7 @@
 
 ## 🌟 Live Demo & Quick Evaluation
 
+- **GitHub Repository**: [https://github.com/SidakSethi-Singh/-joineazy-assignment-dashboard](https://github.com/SidakSethi-Singh/-joineazy-assignment-dashboard)
 - **Deployable Target**: Vercel / Netlify (zero backend, builds into a pure static SPA)
 - **Build Status**: `npm run build` passes with 0 errors / 0 warnings.
 - **Unit & Integration Tests**: `npm test` runs 20 automated Vitest tests covering data isolation, status computations, date urgency, UI component rendering, and storage fallback.

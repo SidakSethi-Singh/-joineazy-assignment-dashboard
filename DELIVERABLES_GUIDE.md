@@ -132,7 +132,7 @@ Create a clean 1-page PDF titled `FullName-Task1.pdf` (e.g., `SidakpreetSingh-Ta
 **Phone**: [Your Phone Number]
 
 ### Evaluation Links:
-1. **GitHub Repository**: https://github.com/[YOUR_USERNAME]/joineazy-assignment-review-dashboard
+1. **GitHub Repository**: https://github.com/SidakSethi-Singh/-joineazy-assignment-dashboard
 2. **Live Deployed Demo**: https://[YOUR_APP].vercel.app (or .netlify.app)
 3. **Demo Video Walkthrough (3-5 min)**: https://www.loom.com/share/[YOUR_LOOM_ID] (or Google Drive link with "anyone with the link can view")
 
